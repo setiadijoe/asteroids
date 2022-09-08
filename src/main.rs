@@ -61,11 +61,11 @@ fn main() {
     };
 
     // Stop time
-    let stop_time = game.add_text("stop_time", "Time: 00:00");
+    let stop_time = game.add_text(ID_STOP_TIME, "Time: 00:00");
     stop_time.translation = Vec2::new(550.0, 320.0);
 
     // Best time
-    let best_time = game.add_text("best_time", "Best Time: 00:00");
+    let best_time = game.add_text(ID_BEST_TIME, "Best Time: 00:00");
     best_time.translation = Vec2::new(-510.0, 320.0);
 
     let player = game.add_sprite(ID_PLAYER, SpritePreset::RacingCarBlue);
@@ -139,7 +139,7 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
 
     // Update the Timer
     if game_state.stop_timer.finished() {
-        let stop_time = engine.texts.get_mut("stop_time").unwrap();
+        let stop_time = engine.texts.get_mut(ID_STOP_TIME).unwrap();
         let running_time = engine.time_since_startup.as_secs() - game_state.start_time;
         let min = running_time / 60;
         let secs = running_time % 60;
@@ -292,12 +292,12 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
 
             // Check for an improved finish time
             let running_time = engine.time_since_startup.as_secs() - game_state.start_time;
-            println!("High Score: {}  ,  Running Time: {}", game_state.high_score, running_time);
+
             if (game_state.high_score == 0) || (running_time < game_state.high_score) {
                 game_state.high_score = running_time;
                 let min = running_time / 60;
                 let secs = running_time % 60;
-                let best_time = engine.texts.get_mut("best_time").unwrap();
+                let best_time = engine.texts.get_mut(ID_BEST_TIME).unwrap();
                 best_time.value = format!("Best Time: {:0>2}:{:0>2}", min, secs);
             }
         }
@@ -371,7 +371,7 @@ fn reset_shots(engine: &mut Engine) {
 }
 
 fn reset_stop_time(engine: &mut Engine, game_state: &mut GameState) {
-    let stop_time = engine.texts.get_mut("stop_time").unwrap();
+    let stop_time = engine.texts.get_mut(ID_STOP_TIME).unwrap();
     stop_time.value = format!("Time: {:0>2}:{:0>2}", 0, 0);
     game_state.stop_timer.reset();
 }
