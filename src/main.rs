@@ -2,7 +2,7 @@ use bevy::prelude::Timer;
 use bevy::utils::Duration;
 use rand::{thread_rng, Rng};
 use rusty_engine::prelude::*;
-use std::{f32::consts::TAU};
+use std::f32::consts::TAU;
 use asteroids::constant::*;
 
 
@@ -14,6 +14,7 @@ struct GameState {
     start_time: Seconds,
     meteoroids: Vec<String>,
     shot_counter: u32,
+    score: u32,
     shot_timer: Timer,
     thrust_timer: Timer,
     stop_timer: Timer,
@@ -33,6 +34,7 @@ impl Default for GameState {
             start_time: 0,
             meteoroids: Vec::new(),
             shot_counter: 0,
+            score: 0,
             shot_timer: Timer::new(Duration::from_millis(RELOAD_TIME), false),
             thrust_timer: Timer::new(Duration::from_millis(THRUST_TIME), false),
             stop_timer: Timer::new(Duration::from_millis(SEC_IN_MSEC), false),
@@ -111,14 +113,14 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
             game_state.stop = false;
         }
 
-        if engine.keyboard_state.pressed(KeyCode::Escape) {
+        if engine.keyboard_state.pressed_any(&[KeyCode::Escape, KeyCode::Q]) {
             engine.should_exit = true;
         }
 
         return;
     }
 
-    let mut game_over = false;
+    let mut game_over: bool = false;
     let max_x = game_state.max_x;
     let min_x = game_state.min_x;
     let max_y = game_state.max_y;
@@ -170,7 +172,7 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
 
     // Give thrust
     if give_thrust {
-        engine.audio_manager.play_sfx(SfxPreset::Forcefield2, 0.2);
+        engine.audio_manager.play_sfx(SfxPreset::Forcefield1, 0.1);
         game_state.speed.x += THRUST_SPEED * (player_rotation as f64).cos() as f32;
         game_state.speed.y += THRUST_SPEED * (player_rotation as f64).sin() as f32;
     }
@@ -275,6 +277,7 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
     // Remove the sprites.
     for sprite_to_delete in &game_state.sprites_to_delete {
         engine.sprites.remove(sprite_to_delete);
+        game_state.score += 1;
     }
     game_state.sprites_to_delete.drain(..);
 
@@ -298,7 +301,7 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
                 let min = running_time / 60;
                 let secs = running_time % 60;
                 let best_time = engine.texts.get_mut(ID_BEST_TIME).unwrap();
-                best_time.value = format!("Best Time: {:0>2}:{:0>2}", min, secs);
+                best_time.value = format!("Best Time: {:0>2}:{:0>2} \n Score: {:0>2}", min, secs, game_state.score);
             }
         }
         let restart_text = engine.add_text("restart", "press R to restart\npress Q or Esc to quit");
